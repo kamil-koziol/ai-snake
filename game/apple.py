@@ -5,6 +5,8 @@ from typing import List
 import pygame as pg
 from random import randint
 
+from game import Block
+
 
 class Apple:
     pos: pg.Vector2
@@ -17,7 +19,6 @@ class Apple:
 
     def find_available_place(self, pieces: List[pg.Vector2]):
         while True:
-
             rnd_vec = pg.Vector2(
                 randint(0, self.board_size - 1),
                 randint(0, self.board_size - 1)
@@ -30,8 +31,5 @@ class Apple:
         self.pos = self.find_available_place(taken_positions)
 
     def draw(self, screen: pg.Surface):
-        pg.draw.rect(screen,
-                     (255, 50, 0),
-                     pg.Rect(self.pos.x * self.piece_size, self.pos.y * self.piece_size, self.piece_size,
-                             self.piece_size)
-                     )
+        b = Block(self.pos, self.piece_size, pg.Color(255, 50, 0))
+        b.draw(screen)

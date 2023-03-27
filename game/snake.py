@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import random
+
 import pygame
 import pygame as pg
 from typing import List, Optional
 from enum import Enum
 
-from game import Apple
+from game import Apple, Block
 import numpy as np
 
 
@@ -34,14 +36,20 @@ class Snake:
     move_dir: MoveDirection
     apples_eaten: int
     age: int
+    hunger: int
 
     apple: Apple
 
+    alive: bool
+
     rays: np.ndarray[float]
 
-    def __init__(self, board_size, piece_size):
+    DEFAULT_HUNGER = 100
+
+    def __init__(self, board_size, piece_size, hunger_enabled = False):
         self.piece_size = piece_size
         self.board_size = board_size
+        self.hunger_enabled = hunger_enabled
 
         self.setup()
 
@@ -49,12 +57,13 @@ class Snake:
         self.pos = pg.Vector2(self.board_size // 2, self.board_size // 2)
         self.pieces = []
         self.pieces.append(self.pos.copy())
-        self.move_dir = MoveDirection.RIGHT
-
+        self.move_dir = MoveDirection(random.randint(0, len(MoveDirection)-1))
         self.apples_eaten = 0
         self.age = 0
         self.set_new_apple()
-        self.rays = np.zeros(24)
+        self.rays = np.zeros((1, 24))
+        self.alive = True
+        self.hunger = Snake.DEFAULT_HUNGER
 
     def set_new_apple(self):
         apple = Apple(self.board_size, self.piece_size)
@@ -66,14 +75,19 @@ class Snake:
             self.grow()
             self.apples_eaten += 1
             self.apple.set_to_random_position(self.pieces)
+            self.hunger = self.DEFAULT_HUNGER
 
     def update(self):
+        if not self.alive:
+            return
+
         self.pos += self.get_dir_vector(self.move_dir)
         self.pieces_update()
 
         self.handle_walls()
         self.handle_self_collision()
         self.handle_apple_collision()
+        self.handle_hunger()
 
         self.update_rays()
         self.age += 1
@@ -97,29 +111,28 @@ class Snake:
 
     def draw(self, screen: pg.Surface):
         for piece in self.pieces:
-            pg.draw.rect(
-                screen,
-                (50, 230, 0),
-                pg.Rect(piece.x * self.piece_size, piece.y * self.piece_size, self.piece_size, self.piece_size),
-                10
-            )
+            b = Block(piece, self.piece_size, pg.Color(50, 230, 0))
+            b.draw(screen)
 
         self.apple.draw(screen)
 
     def handle_event(self, event: pg.event.Event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                self.move_dir = MoveDirection.LEFT
+                self.set_move_dir(MoveDirection.LEFT)
             elif event.key == pygame.K_RIGHT:
-                self.move_dir = MoveDirection.RIGHT
+                self.set_move_dir(MoveDirection.RIGHT)
             elif event.key == pygame.K_DOWN:
-                self.move_dir = MoveDirection.DOWN
+                self.set_move_dir(MoveDirection.DOWN)
             if event.key == pygame.K_UP:
-                self.move_dir = MoveDirection.UP
+                self.set_move_dir(MoveDirection.UP)
 
     def handle_walls(self):
         if self.pos.x < 0 or self.pos.x > self.board_size - 1 or self.pos.y < 0 or self.pos.y > self.board_size - 1:
-            self.restart()
+            self.die()
+
+    def die(self):
+        self.alive = False
 
     def update_rays(self):
 
@@ -127,19 +140,19 @@ class Snake:
         MAX_DISTANCE = self.board_size * DIAG
         # walls
 
-        self.rays[RaysDirections.UP.value] = self.pos.y
-        self.rays[RaysDirections.RIGHT.value] = self.board_size - self.pos.x
-        self.rays[RaysDirections.DOWN.value] = self.board_size - self.pos.y
-        self.rays[RaysDirections.LEFT.value] = self.pos.x
+        self.rays[0,RaysDirections.UP.value] = self.pos.y
+        self.rays[0,RaysDirections.RIGHT.value] = self.board_size - self.pos.x
+        self.rays[0,RaysDirections.DOWN.value] = self.board_size - self.pos.y
+        self.rays[0,RaysDirections.LEFT.value] = self.pos.x
 
-        self.rays[RaysDirections.UP_RIGHT.value] = min(self.rays[RaysDirections.UP.value],
-                                                       self.rays[RaysDirections.RIGHT.value]) * DIAG
-        self.rays[RaysDirections.DOWN_RIGHT.value] = min(self.rays[RaysDirections.DOWN.value],
-                                                         self.rays[RaysDirections.RIGHT.value]) * DIAG
-        self.rays[RaysDirections.DOWN_LEFT.value] = min(self.rays[RaysDirections.DOWN.value],
-                                                        self.rays[RaysDirections.LEFT.value]) * DIAG
-        self.rays[RaysDirections.UP_LEFT.value] = min(self.rays[RaysDirections.UP.value],
-                                                      self.rays[RaysDirections.LEFT.value]) * DIAG
+        self.rays[0,RaysDirections.UP_RIGHT.value] = min(self.rays[0,RaysDirections.UP.value],
+                                                       self.rays[0,RaysDirections.RIGHT.value]) * DIAG
+        self.rays[0,RaysDirections.DOWN_RIGHT.value] = min(self.rays[0,RaysDirections.DOWN.value],
+                                                         self.rays[0,RaysDirections.RIGHT.value]) * DIAG
+        self.rays[0,RaysDirections.DOWN_LEFT.value] = min(self.rays[0,RaysDirections.DOWN.value],
+                                                        self.rays[0,RaysDirections.LEFT.value]) * DIAG
+        self.rays[0,RaysDirections.UP_LEFT.value] = min(self.rays[0,RaysDirections.UP.value],
+                                                      self.rays[0,RaysDirections.LEFT.value]) * DIAG
 
         # apple
 
@@ -147,10 +160,10 @@ class Snake:
         diff = (self.apple.pos - self.pos)
 
         for direction in range(len(RaysDirections)):
-            self.rays[len(RaysDirections) + direction] = MAX_DISTANCE
+            self.rays[0,len(RaysDirections) + direction] = MAX_DISTANCE
 
         if apple_dir:
-            self.rays[len(RaysDirections) + apple_dir.value] = diff.magnitude()
+            self.rays[0,len(RaysDirections) + apple_dir.value] = diff.magnitude()
 
         # self
 
@@ -163,7 +176,7 @@ class Snake:
                     smallest[piece_dir.value] = dist
 
         for direction in range(len(RaysDirections)):
-            self.rays[len(RaysDirections) * 2 + direction] = smallest[direction]
+            self.rays[0,len(RaysDirections) * 2 + direction] = smallest[direction]
 
         # normalizing
 
@@ -204,6 +217,25 @@ class Snake:
     def handle_self_collision(self):
         if self.pos in self.pieces[1:]:
             self.restart()
+
+    def handle_hunger(self):
+        self.hunger -= 1
+        if self.hunger == 0:
+            self.die()
+
+    def set_move_dir(self, move_dir: MoveDirection):
+
+        if self.apples_eaten != 0:
+            if self.move_dir == MoveDirection.DOWN and move_dir == MoveDirection.UP:
+                return
+            if self.move_dir == MoveDirection.UP and move_dir == MoveDirection.DOWN:
+                return
+            if self.move_dir == MoveDirection.LEFT and move_dir == MoveDirection.RIGHT:
+                return
+            if self.move_dir == MoveDirection.RIGHT and move_dir == MoveDirection.LEFT:
+                return
+
+        self.move_dir = move_dir
 
     def restart(self):
         self.setup()

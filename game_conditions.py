@@ -3,7 +3,7 @@ import sys
 import pygame
 import pygame as pg
 from time import sleep
-from game import Snake, MoveDirection
+from game import Snake, MoveDirection, Board
 
 pg.init()
 
@@ -21,6 +21,7 @@ dt: float = 0.0
 counter: float = 0.0
 DELAY = 0.01
 
+board = Board(board_size, piece_size)
 
 def tick():
     snake.update()
@@ -45,7 +46,6 @@ def tick():
     if snake.pos.x == 0 and snake.pos.y == 0:
         snake.move_dir = MoveDirection.RIGHT
 
-
 while True:
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -59,7 +59,10 @@ while True:
     # drawing
     screen.fill(pg.color.THECOLORS["black"])
 
+    board.draw(screen)
+
     snake.draw(screen)
+
 
     pg.display.flip()
     dt = clock.tick(FRAME_RATE) / 1000.0

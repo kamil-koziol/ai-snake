@@ -1,7 +1,7 @@
 import sys
 import pygame as pg
 from time import sleep
-from game import Snake, Apple
+from game import Snake, Apple, Board
 
 pg.init()
 
@@ -17,7 +17,9 @@ FRAME_RATE = 60
 clock = pg.time.Clock()
 dt: float = 0.0
 counter: float = 0.0
+DELAY = 0.125
 
+board = Board(board_size, piece_size)
 
 def tick():
     snake.update()
@@ -31,13 +33,15 @@ while True:
         snake.handle_event(event)
 
     # updates
-    if counter >= 0.125:
+    if counter >= DELAY:
         tick()
 
         counter = 0
 
     # drawing
     screen.fill(pg.color.THECOLORS["black"])
+
+    board.draw(screen)
 
     snake.draw(screen)
 
