@@ -17,19 +17,15 @@ class Layer:
         self.activation = activation
 
     def setup(self, previous_layer: Layer):
-        self.weights = np.random.random((previous_layer.size, self.size))
-        self.biases = np.random.random((1, self.size))
+        self.weights = (np.random.random((previous_layer.size, self.size)) * 2) - 1.0
+        self.biases = (np.random.random((1, self.size)) * 2) - 1.0
 
     def calculate(self, _input: np.ndarray):
         self.neurons = (_input @ self.weights) + self.biases
         self.neurons = self.activation(self.neurons)
 
-class InputLayer(Layer):
-    def __init__(self, size: int):
-        super().__init__(size, linear)
 
+class InputLayer(Layer):
     def setup(self, previous_layer: Layer):
         self.weights = np.ndarray([])
         self.biases = np.ndarray([])
-
-

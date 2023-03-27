@@ -29,19 +29,21 @@ board = Board(board_size, piece_size)
 
 # Genetic parameters
 
-N_ELITES: int = 30
-N_MUTATION: int = 1000
-N_CROSSOVER: int = 0
+N_ELITES: int = 10
+N_MUTATION: int = 500
+N_CROSSOVER: int = 500
 N_POPULATION = N_ELITES + N_MUTATION + N_CROSSOVER
+current_generation = 1
 
 snakes: List[Snake] = [Snake(board_size, piece_size, True) for _ in range(N_POPULATION)]
+population: List[NeuralNetwork] = []
 
-population = []
 for i in range(N_POPULATION):
+
     model = NeuralNetwork([
-        InputLayer(24),
-        Layer(32, relu),
-        Layer(16, relu),
+        InputLayer(28, linear),
+        Layer(20, relu),
+        Layer(12, relu),
         Layer(4, softmax)
     ])
 
@@ -57,20 +59,22 @@ def get_random_individual_index(fitnesses):
 
 
 def calculate_fitness(snake: Snake) -> float:
-    return (snake.apples_eaten+1) ** 2
+    return snake.age**2 + (3 ** snake.apples_eaten)
+    # return (snake.apples_eaten+1) ** 2
+
 
 def tick():
     snakes_alive = 0
+
     for snake, model in zip(snakes, population):
         if not snake.alive:
             continue
 
-        snake.update()
         predictions = model.predict(snake.rays)
         snake.set_move_dir(MoveDirection(np.argmax(predictions)))
+        snake.update()
 
         snakes_alive += 1
-
 
     if snakes_alive == 0:
         new_generation()
@@ -79,41 +83,58 @@ def tick():
 def new_generation():
     global population
     global snakes
+    global current_generation
 
     fitnesses = [calculate_fitness(snake) for snake in snakes]
     sum_of_fitnesses = sum(fitnesses)
 
-    fitnesses = [fitness/sum_of_fitnesses for fitness in fitnesses] # values between 0 and 1 - kinda unneccessary
+    probabilities = [fitness / sum_of_fitnesses for fitness in fitnesses]  # values between 0 and 1 - kinda unneccessary
 
     new_population = []
-    population = [x for _, x in sorted(zip(fitnesses, population), key=lambda pair: pair[0])]
-    fitnesses.sort()
+    population = [p for f, p in sorted(zip(probabilities, population), key=lambda pair: pair[0])]
+    probabilities.sort()
 
     # mutations
     for i in range(N_MUTATION):
-        rnd_indiv = get_random_individual_index(fitnesses)
+        rnd_indiv = get_random_individual_index(probabilities)
         new_indiv = population[rnd_indiv].copy()
-        new_indiv.mutate(0.3)
+        new_indiv.mutate(0.05)
 
         new_population.append(new_indiv)
 
     # crossovers
 
     for i in range(N_CROSSOVER):
-        rnd_a = get_random_individual_index(fitnesses)
-        rnd_b = get_random_individual_index(fitnesses)
+        rnd_a = get_random_individual_index(probabilities)
+        rnd_b = get_random_individual_index(probabilities)
+
+        n_indiv = population[rnd_a].copy()
+        n_indiv.crossover(population[rnd_b])
+        new_population.append(n_indiv)
 
     # elitarism
     for individual in population[N_POPULATION - N_ELITES:]:
         new_population.append(individual.copy())
 
-    del population
     population = new_population
+
+    print("====== GENERATION REPORT ======")
+
+    print(f"GENERATION: {current_generation}")
+    print(f"AVG FITNESS: {sum_of_fitnesses/len(fitnesses)}")
+    print(f"MAX FITNESS: {max(fitnesses)}")
+    print(f"FITNESS TOTAL: {sum_of_fitnesses}")
+    print(f"MAX APPLES: {max(snakes, key=lambda s: s.apples_eaten).apples_eaten}")
+
+    print("===============================\n")
+
     for snake in snakes:
         snake.restart()
 
+    current_generation += 1
+    population[-1].save("brains/brain" + str(current_generation) +  " " + str(max(fitnesses)) +".npy")
 
-longest_snake = snakes[0]
+
 
 while True:
     for event in pg.event.get():
@@ -131,15 +152,8 @@ while True:
 
     board.draw(screen)
 
-    tmp_longest = max(snakes, key=lambda s: s.apples_eaten)
-    if tmp_longest.apples_eaten > longest_snake.apples_eaten:
-        longest_snake = tmp_longest
-
-    longest_snake.draw(screen)
-    # for snake in snakes[::-1]:
-    #     if snake.alive:
-    #         snake.draw(screen)
-    #         break
+    for snake in snakes[N_POPULATION - N_ELITES::2]:
+        snake.draw(screen)
 
     pg.display.flip()
     dt = clock.tick(FRAME_RATE) / 1000.0
