@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 pygame = "*"
 numpy = "*"
-tensorflow = "*"
 
 [dev-packages]
 

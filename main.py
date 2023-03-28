@@ -23,6 +23,10 @@ board = Board(board_size, piece_size)
 
 def tick():
     snake.update()
+    print("WALLS", snake.rays[0, 0: 8])
+    print("APPLE", snake.rays[0, 8: 16])
+    print("SELF", snake.rays[0, 16:24])
+    print("DIRECTIONS", snake.rays[0, 24:])
 
 
 while True:
@@ -32,9 +36,12 @@ while True:
 
         snake.handle_event(event)
 
+        if event.type == pg.KEYDOWN:
+            tick()
+
     # updates
     if counter >= DELAY:
-        tick()
+        # tick()
 
         counter = 0
 

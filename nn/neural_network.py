@@ -58,7 +58,13 @@ class NeuralNetwork:
                 for col in range(n):
                     rnd = random.random()
                     if rnd < mutation_rate:
-                        self.layers[i].weights[row, col] = (random.random() * 2) - 1.0
+                        self.layers[i].weights[row, col] += random.gauss(0, 1)
+
+                        if self.layers[i].weights[row, col] < -1.0:
+                            self.layers[i].weights[row, col] = -1.0
+
+                        if self.layers[i].weights[row, col] > 1.0:
+                            self.layers[i].weights[row, col] = 1.0
 
             m, n = self.layers[i].biases.shape
 
@@ -66,7 +72,7 @@ class NeuralNetwork:
                 for col in range(n):
                     rnd = random.random()
                     if rnd < mutation_rate:
-                        self.layers[i].biases[row, col] = (random.random() * 2) - 1.0
+                        self.layers[i].biases[row, col] += random.gauss(0, 1)
 
     def crossover(self, other: NeuralNetwork):
         for i in range(1, len(self.layers)):
@@ -89,11 +95,13 @@ class NeuralNetwork:
             for layer in self.layers:
                 np.save(f, layer.weights)
                 np.save(f, layer.biases)
+
     def load(self, filename):
         with open(filename, 'rb') as f:
             for layer in self.layers:
                 layer.weights = np.load(f)
                 layer.biases = np.load(f)
+
 
 if __name__ == "__main__":
     model = NeuralNetwork([
@@ -113,12 +121,15 @@ if __name__ == "__main__":
     print(x.layers[1].weights[0, 0])
 
     print(model.layers[1].weights[0])
-    model.save("test.npy")
+    # model.save("test.npy")
     mcpy = NeuralNetwork([
         InputLayer(28, linear),
         Layer(16, relu),
         Layer(8, relu),
         Layer(4, softmax)
     ])
-    mcpy.load("test.npy")
+    # mcpy.load("test.npy")
     print(model.layers[1].weights[0])
+
+    for i in range(100):
+        print(random.gauss(0, 1))

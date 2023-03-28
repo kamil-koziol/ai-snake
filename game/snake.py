@@ -44,7 +44,7 @@ class Snake:
 
     rays: np.ndarray[float]
 
-    DEFAULT_HUNGER = 60
+    DEFAULT_HUNGER = 100
 
     def __init__(self, board_size, piece_size, hunger_enabled=False):
         self.piece_size = piece_size
@@ -77,7 +77,10 @@ class Snake:
             self.grow()
             self.apples_eaten += 1
             self.apple.set_to_random_position(self.pieces)
-            self.hunger += self.DEFAULT_HUNGER
+            if self.apples_eaten < 10:
+                self.hunger += self.DEFAULT_HUNGER
+            else:
+                self.hunger += self.DEFAULT_HUNGER * self.apples_eaten
 
     def update(self):
         if not self.alive:
@@ -91,7 +94,8 @@ class Snake:
         self.handle_apple_collision()
         self.handle_hunger()
 
-        self.update_rays()
+        # self.update_rays()
+        self.update_rays_binary()
         self.age += 1
 
     def pieces_update(self):
@@ -143,8 +147,8 @@ class Snake:
         # walls
 
         self.rays[0, RaysDirections.UP.value] = self.pos.y
-        self.rays[0, RaysDirections.RIGHT.value] = self.board_size - self.pos.x
-        self.rays[0, RaysDirections.DOWN.value] = self.board_size - self.pos.y
+        self.rays[0, RaysDirections.RIGHT.value] = self.board_size - self.pos.x - 1
+        self.rays[0, RaysDirections.DOWN.value] = self.board_size - self.pos.y - 1
         self.rays[0, RaysDirections.LEFT.value] = self.pos.x
 
         self.rays[0, RaysDirections.UP_RIGHT.value] = min(self.rays[0, RaysDirections.UP.value],
@@ -180,16 +184,35 @@ class Snake:
         for direction in range(len(RaysDirections)):
             self.rays[0, len(RaysDirections) * 2 + direction] = smallest[direction]
 
-        # directions - binary
 
+        # normalizing
+
+        self.rays /= MAX_DISTANCE
+
+        # directions - binary
         self.rays[0, 24] = 1 if self.move_dir == MoveDirection.UP else 0
         self.rays[0, 25] = 1 if self.move_dir == MoveDirection.RIGHT else 0
         self.rays[0, 26] = 1 if self.move_dir == MoveDirection.DOWN else 0
         self.rays[0, 27] = 1 if self.move_dir == MoveDirection.LEFT else 0
 
-        # normalizing
+    def update_rays_binary(self):
 
-        self.rays /= MAX_DISTANCE
+        DIAG = 1.4
+        MAX_DISTANCE = self.board_size * DIAG
+
+        self.update_rays()
+        for i in range(len(RaysDirections)):
+            smallest = 1
+            for j in range(3):
+                if self.rays[0, len(RaysDirections)*j + i] <= smallest:
+                    smallest = self.rays[0, len(RaysDirections)*j + i]
+
+            for j in range(3):
+                if self.rays[0, len(RaysDirections)*j + i] == smallest:
+                    self.rays[0, len(RaysDirections)*j + i] = 1
+                else:
+                    self.rays[0, len(RaysDirections)*j + i] = 0
+
 
     def get_direction_between_vectors(self, vec1: pg.Vector2, vec2: pg.Vector2) -> Optional[RaysDirections]:
         diff = (vec2 - vec1)
@@ -225,7 +248,7 @@ class Snake:
 
     def handle_self_collision(self):
         if self.pos in self.pieces[1:]:
-            self.restart()
+            self.die()
 
     def handle_hunger(self):
         self.hunger -= 1

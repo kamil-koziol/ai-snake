@@ -4,6 +4,7 @@ from typing import List
 import pygame as pg
 from game import Snake, Apple, Board, MoveDirection
 import random
+from threading import Thread
 
 import numpy as np
 
@@ -16,7 +17,7 @@ pg.init()
 size = WIDTH, HEIGHT = 800, 800
 screen = pg.display.set_mode(size)
 
-board_size = 20
+board_size = 10
 piece_size = WIDTH // board_size
 
 FRAME_RATE = 60
@@ -29,9 +30,9 @@ board = Board(board_size, piece_size)
 
 # Genetic parameters
 
-N_ELITES: int = 10
-N_MUTATION: int = 500
-N_CROSSOVER: int = 500
+N_ELITES: int = 50
+N_MUTATION: int = 700
+N_CROSSOVER: int = 250
 N_POPULATION = N_ELITES + N_MUTATION + N_CROSSOVER
 current_generation = 1
 
@@ -39,10 +40,9 @@ snakes: List[Snake] = [Snake(board_size, piece_size, True) for _ in range(N_POPU
 population: List[NeuralNetwork] = []
 
 for i in range(N_POPULATION):
-
     model = NeuralNetwork([
         InputLayer(28, linear),
-        Layer(20, relu),
+        Layer(24, relu),
         Layer(12, relu),
         Layer(4, softmax)
     ])
@@ -59,12 +59,42 @@ def get_random_individual_index(fitnesses):
 
 
 def calculate_fitness(snake: Snake) -> float:
-    return snake.age**2 + (3 ** snake.apples_eaten)
+    if snake.apples_eaten < 10:
+        return ((1 + (float(snake.age) * DELAY * 10)) ** 1.7) * (2 ** snake.apples_eaten)
+    else:
+        return ((1 + (float(snake.age) * DELAY * 10)) ** 2) * (2 ** 10) * (snake.apples_eaten-9)
     # return (snake.apples_eaten+1) ** 2
 
 
 def tick():
     snakes_alive = 0
+
+    def task(ss: List[Snake], pp: List[NeuralNetwork]):
+        for snake, model in zip(ss, pp):
+            if not snake.alive:
+                continue
+            predictions = model.predict(snake.rays)
+            snake.set_move_dir(MoveDirection(np.argmax(predictions)))
+            snake.update()
+
+    # threads = []
+    # for i in range(10):
+    #     size_s = len(snakes)//10
+    #     thread = Thread(target=task, args=(snakes[i*size_s:(i+1)*size_s], population[i*size_s:(i+1)*size_s]))
+    #     threads.append(thread)
+    #     thread.start()
+    #
+    # for thread in threads:
+    #     thread.join()
+    #
+    # anyAlive = False
+    # for snake in snakes:
+    #     if snake.alive:
+    #         anyAlive = True
+    #         break
+    #
+    # if not anyAlive:
+    #     new_generation()
 
     for snake, model in zip(snakes, population):
         if not snake.alive:
@@ -92,13 +122,14 @@ def new_generation():
 
     new_population = []
     population = [p for f, p in sorted(zip(probabilities, population), key=lambda pair: pair[0])]
+
     probabilities.sort()
 
     # mutations
     for i in range(N_MUTATION):
         rnd_indiv = get_random_individual_index(probabilities)
         new_indiv = population[rnd_indiv].copy()
-        new_indiv.mutate(0.05)
+        new_indiv.mutate(0.1)
 
         new_population.append(new_indiv)
 
@@ -121,7 +152,7 @@ def new_generation():
     print("====== GENERATION REPORT ======")
 
     print(f"GENERATION: {current_generation}")
-    print(f"AVG FITNESS: {sum_of_fitnesses/len(fitnesses)}")
+    print(f"AVG FITNESS: {sum_of_fitnesses / len(fitnesses)}")
     print(f"MAX FITNESS: {max(fitnesses)}")
     print(f"FITNESS TOTAL: {sum_of_fitnesses}")
     print(f"MAX APPLES: {max(snakes, key=lambda s: s.apples_eaten).apples_eaten}")
@@ -132,8 +163,7 @@ def new_generation():
         snake.restart()
 
     current_generation += 1
-    population[-1].save("brains/brain" + str(current_generation) +  " " + str(max(fitnesses)) +".npy")
-
+    population[-1].save("brains/brain" + str(current_generation) + " " + str(max(fitnesses)) + ".npy")
 
 
 while True:
@@ -152,8 +182,10 @@ while True:
 
     board.draw(screen)
 
-    for snake in snakes[N_POPULATION - N_ELITES::2]:
-        snake.draw(screen)
+    for snake in snakes[::-1]:
+        if snake.alive:
+            snake.draw(screen)
+            break
 
     pg.display.flip()
     dt = clock.tick(FRAME_RATE) / 1000.0
