@@ -5,8 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game/snake.py" beforeDir="false" afterPath="$PROJECT_DIR$/game/snake.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/genetic.py" beforeDir="false" afterPath="$PROJECT_DIR$/genetic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nn/activation_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/nn/activation_functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nn/neural_network.py" beforeDir="false" afterPath="$PROJECT_DIR$/nn/neural_network.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -143,9 +141,9 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.genetic" />
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.activation_functions" />
         <item itemvalue="Python.snake" />
-        <item itemvalue="Python.main" />
         <item itemvalue="Python.neural_network" />
       </list>
     </recent_temporary>
@@ -159,7 +157,7 @@
       <option name="presentableId" value="Default" />
       <updated>1679945722671</updated>
       <workItem from="1679945724284" duration="34312000" />
-      <workItem from="1680349887813" duration="840000" />
+      <workItem from="1680349887813" duration="2748000" />
     </task>
     <servers />
   </component>
@@ -167,10 +165,10 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/ai_snake$main.coverage" NAME="main Coverage Results" MODIFIED="1680025840366" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ai_snake$main.coverage" NAME="main Coverage Results" MODIFIED="1680356232849" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ai_snake$neural_network.coverage" NAME="neural_network Coverage Results" MODIFIED="1679955958142" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/nn" />
     <SUITE FILE_PATH="coverage/ai_snake$activation_functions.coverage" NAME="activation_functions Coverage Results" MODIFIED="1680099435186" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/nn" />
     <SUITE FILE_PATH="coverage/ai_snake$snake.coverage" NAME="snake Coverage Results" MODIFIED="1680034615407" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/game" />
-    <SUITE FILE_PATH="coverage/ai_snake$genetic.coverage" NAME="genetic Coverage Results" MODIFIED="1680350165385" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ai_snake$genetic.coverage" NAME="genetic Coverage Results" MODIFIED="1680356240504" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

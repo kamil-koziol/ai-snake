@@ -41,16 +41,13 @@ population: List[NeuralNetwork] = []
 
 for i in range(N_POPULATION):
     model = NeuralNetwork([
-        InputLayer(24, linear),
+        InputLayer(28, linear),
         Layer(24, relu),
         Layer(12, relu),
         Layer(4, softmax)
     ])
 
     population.append(model)
-
-for i in range(100):
-    population[i].load("brains/brain10 29984768.npy")
 
 
 def get_random_individual_index(fitnesses):
@@ -62,7 +59,7 @@ def get_random_individual_index(fitnesses):
 
 
 def calculate_fitness(snake: Snake) -> float:
-    return snake.age ** 2 * (2 ** snake.apples_eaten)
+    return snake.age ** 2 + (2 ** snake.apples_eaten)
 
 
 def tick():

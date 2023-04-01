@@ -45,6 +45,7 @@ class Snake:
     rays: np.ndarray[float]
 
     DEFAULT_HUNGER = 200
+    STARTING_SNAKE_SIZE = 3
 
     def __init__(self, board_size, piece_size, hunger_enabled=False):
         self.piece_size = piece_size
@@ -54,16 +55,19 @@ class Snake:
         self.setup()
 
     def setup(self):
-        self.pos = pg.Vector2(random.randint(0, self.board_size - 1), random.randint(0, self.board_size - 1))
+        self.pos = pg.Vector2(random.randint(0, self.board_size - 1 - self.STARTING_SNAKE_SIZE), random.randint(0, self.board_size - 1 - self.STARTING_SNAKE_SIZE))
         self.pieces = []
         self.pieces.append(self.pos.copy())
 
         self.move_dir = MoveDirection(random.randint(0, len(MoveDirection) - 1))
 
+        self.initial_tail_setup(self.move_dir, self.STARTING_SNAKE_SIZE)
+
+
         self.apples_eaten = 0
         self.age = 0
         self.set_new_apple()
-        self.rays = np.zeros((1, 24))
+        self.rays = np.zeros((1, 28))
         self.alive = True
         self.hunger = Snake.DEFAULT_HUNGER
         self.update_rays()
@@ -99,6 +103,15 @@ class Snake:
     def pieces_update(self):
         self.pieces.pop()
         self.pieces.insert(0, self.pos.copy())
+
+    def initial_tail_setup(self, movedir: MoveDirection, size):
+        # creating initial lenght
+        mdir = self.get_dir_vector(movedir) * -1
+        npos = self.pos.copy()
+        for i in range(size - 1):
+            npos += mdir
+            self.pieces.append(npos.copy())
+
 
     def grow(self):
         self.pieces.append(self.pieces[-1])
@@ -188,6 +201,11 @@ class Snake:
         # normalizing
 
         self.rays /= MAX_DISTANCE
+
+        self.rays[0, 24] = 1 if self.move_dir == MoveDirection.UP else 0
+        self.rays[0, 25] = 1 if self.move_dir == MoveDirection.RIGHT else 0
+        self.rays[0, 26] = 1 if self.move_dir == MoveDirection.DOWN else 0
+        self.rays[0, 27] = 1 if self.move_dir == MoveDirection.LEFT else 0
 
         # rotate rays to relative direction
 
