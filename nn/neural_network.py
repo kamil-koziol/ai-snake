@@ -125,7 +125,6 @@ if __name__ == "__main__":
     mcpy = NeuralNetwork([
         InputLayer(28, linear),
         Layer(16, relu),
-        Layer(8, relu),
         Layer(4, softmax)
     ])
     # mcpy.load("test.npy")

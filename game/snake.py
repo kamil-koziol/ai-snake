@@ -44,7 +44,7 @@ class Snake:
 
     rays: np.ndarray[float]
 
-    DEFAULT_HUNGER = 100
+    DEFAULT_HUNGER = 200
 
     def __init__(self, board_size, piece_size, hunger_enabled=False):
         self.piece_size = piece_size
@@ -63,9 +63,10 @@ class Snake:
         self.apples_eaten = 0
         self.age = 0
         self.set_new_apple()
-        self.rays = np.zeros((1, 28))
+        self.rays = np.zeros((1, 24))
         self.alive = True
         self.hunger = Snake.DEFAULT_HUNGER
+        self.update_rays()
 
     def set_new_apple(self):
         apple = Apple(self.board_size, self.piece_size)
@@ -77,10 +78,7 @@ class Snake:
             self.grow()
             self.apples_eaten += 1
             self.apple.set_to_random_position(self.pieces)
-            if self.apples_eaten < 10:
-                self.hunger += self.DEFAULT_HUNGER
-            else:
-                self.hunger += self.DEFAULT_HUNGER * self.apples_eaten
+            self.hunger = self.DEFAULT_HUNGER
 
     def update(self):
         if not self.alive:
@@ -94,8 +92,8 @@ class Snake:
         self.handle_apple_collision()
         self.handle_hunger()
 
-        # self.update_rays()
-        self.update_rays_binary()
+        self.update_rays()
+        # self.update_rays_binary()
         self.age += 1
 
     def pieces_update(self):
@@ -141,6 +139,8 @@ class Snake:
         self.alive = False
 
     def update_rays(self):
+
+        # TODO: MAKE RELATIVE RAYS TO CURRENT DIRECTION
 
         DIAG = 1.4
         MAX_DISTANCE = self.board_size * DIAG
@@ -189,11 +189,19 @@ class Snake:
 
         self.rays /= MAX_DISTANCE
 
-        # directions - binary
-        self.rays[0, 24] = 1 if self.move_dir == MoveDirection.UP else 0
-        self.rays[0, 25] = 1 if self.move_dir == MoveDirection.RIGHT else 0
-        self.rays[0, 26] = 1 if self.move_dir == MoveDirection.DOWN else 0
-        self.rays[0, 27] = 1 if self.move_dir == MoveDirection.LEFT else 0
+        # rotate rays to relative direction
+
+        # movement = -self.move_dir.value*2
+        #
+        # for i in range(3):
+        #     tmp_rays = np.zeros(len(RaysDirections))
+        #
+        #     for j in range(len(RaysDirections)):
+        #         tmp_rays[(j + movement) % len(RaysDirections)] = self.rays[0, i*len(RaysDirections) + j]
+        #
+        #     for j in range(len(RaysDirections)):
+        #         self.rays[0, i * len(RaysDirections) + j] = tmp_rays[j]
+
 
     def update_rays_binary(self):
 

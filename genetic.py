@@ -17,7 +17,7 @@ pg.init()
 size = WIDTH, HEIGHT = 800, 800
 screen = pg.display.set_mode(size)
 
-board_size = 10
+board_size = 20
 piece_size = WIDTH // board_size
 
 FRAME_RATE = 60
@@ -30,9 +30,9 @@ board = Board(board_size, piece_size)
 
 # Genetic parameters
 
-N_ELITES: int = 50
-N_MUTATION: int = 700
-N_CROSSOVER: int = 250
+N_ELITES: int = 10
+N_MUTATION: int = 750
+N_CROSSOVER: int = 750
 N_POPULATION = N_ELITES + N_MUTATION + N_CROSSOVER
 current_generation = 1
 
@@ -41,13 +41,16 @@ population: List[NeuralNetwork] = []
 
 for i in range(N_POPULATION):
     model = NeuralNetwork([
-        InputLayer(28, linear),
+        InputLayer(24, linear),
         Layer(24, relu),
         Layer(12, relu),
         Layer(4, softmax)
     ])
 
     population.append(model)
+
+for i in range(100):
+    population[i].load("brains/brain10 29984768.npy")
 
 
 def get_random_individual_index(fitnesses):
@@ -59,11 +62,7 @@ def get_random_individual_index(fitnesses):
 
 
 def calculate_fitness(snake: Snake) -> float:
-    if snake.apples_eaten < 10:
-        return ((1 + (float(snake.age) * DELAY * 10)) ** 1.7) * (2 ** snake.apples_eaten)
-    else:
-        return ((1 + (float(snake.age) * DELAY * 10)) ** 2) * (2 ** 10) * (snake.apples_eaten-9)
-    # return (snake.apples_eaten+1) ** 2
+    return snake.age ** 2 * (2 ** snake.apples_eaten)
 
 
 def tick():
@@ -129,7 +128,7 @@ def new_generation():
     for i in range(N_MUTATION):
         rnd_indiv = get_random_individual_index(probabilities)
         new_indiv = population[rnd_indiv].copy()
-        new_indiv.mutate(0.1)
+        new_indiv.mutate(0.2)
 
         new_population.append(new_indiv)
 
@@ -182,10 +181,9 @@ while True:
 
     board.draw(screen)
 
-    for snake in snakes[::-1]:
+    for snake in snakes[N_POPULATION - N_ELITES::N_ELITES // 10]:
         if snake.alive:
             snake.draw(screen)
-            break
 
     pg.display.flip()
     dt = clock.tick(FRAME_RATE) / 1000.0
