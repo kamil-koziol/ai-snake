@@ -1,0 +1,33 @@
+{
+  "GA": {
+    "amount_of_elites": 10,
+    "amount_of_mutations": 250,
+    "amount_of_crossovers": 250,
+    "mutation_rate": 0.05
+  },
+
+  "NN": {
+    "layers": [
+      {
+        "type": "input",
+        "neurons": 28,
+        "activation": null
+      },
+      {
+        "type": "dense",
+        "neurons": 24,
+        "activation": "relu"
+      },
+            {
+        "type": "dense",
+        "neurons": 12,
+        "activation": "relu"
+      },
+            {
+        "type": "input",
+        "neurons": 4,
+        "activation": "softmax"
+      }
+    ]
+  }
+}

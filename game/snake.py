@@ -296,3 +296,4 @@ class Snake:
 
     def restart(self):
         self.setup()
+

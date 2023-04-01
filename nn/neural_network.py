@@ -78,16 +78,22 @@ class NeuralNetwork:
         for i in range(1, len(self.layers)):
             m, n = self.layers[i].weights.shape
 
+            randr = random.randint(0, m - 1)
+            randc = random.randint(0, n - 1)
+
             for row in range(m):
                 for col in range(n):
-                    if col % 2 == 1:
+                    if row < randr or (row == randr and col <= randc):
                         self.layers[i].weights[row, col] = other.layers[i].weights[row, col]
 
             m, n = self.layers[i].biases.shape
 
+            randr = random.randint(0, m - 1)
+            randc = random.randint(0, n - 1)
+
             for row in range(m):
                 for col in range(n):
-                    if col % 2 == 1:
+                    if row < randr or (row == randr and col <= randc):
                         self.layers[i].biases[row, col] = other.layers[i].biases[row, col]
 
     def save(self, filename):
