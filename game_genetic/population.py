@@ -1,20 +1,21 @@
 import random
 
-from game_genetic import GeneticSnake
+from game_genetic import GeneticSnake, GeneticNeuralNetwork
 from typing import List
 import pygame as pg
 
-from nn import NeuralNetwork
 from nn.activation_functions import linear, relu, softmax
 from nn.layer import InputLayer, Layer
+
+import json
 
 
 class Population:
     snakes: List[GeneticSnake]
 
     N_ELITES: int = 10
-    N_MUTATION: int = 250
-    N_CROSSOVER: int = 250
+    N_MUTATION: int = 300
+    N_CROSSOVER: int = 200
     N_POPULATION = N_ELITES + N_MUTATION + N_CROSSOVER
     current_generation: int = 1
 
@@ -28,9 +29,9 @@ class Population:
         self.snakes = []
 
         for i in range(self.N_POPULATION):
-            model = NeuralNetwork([
+            model = GeneticNeuralNetwork([
                 InputLayer(28, linear),
-                Layer(24, relu),
+                Layer(20, relu),
                 Layer(12, relu),
                 Layer(4, softmax)
             ])
@@ -66,7 +67,7 @@ class Population:
         for i in range(self.N_MUTATION):
             rnd_indiv = self.get_random_individual(sum_of_fitnesses)
             new_indiv = GeneticSnake(self.board_size, self.piece_size, rnd_indiv.brain.copy())
-            new_indiv.brain.mutate(0.2)
+            new_indiv.brain.mutate(0.7, 0.5)
             new_population.append(new_indiv)
 
         # crossovers
@@ -95,7 +96,7 @@ class Population:
 
 
     def draw(self, screen: pg.Surface):
-        for snake in self.snakes[self.N_POPULATION - self.N_ELITES::self.N_ELITES // 10]:
+        for snake in self.snakes[-self.N_ELITES::(self.N_ELITES // 10 if self.N_ELITES//10 > 1 else 1)]:
             if snake.alive:
                 snake.draw(screen)
 
@@ -117,3 +118,4 @@ class Population:
         print(f"MIN APPLES: {min(self.snakes, key=lambda s: s.apples_eaten).apples_eaten}")
 
         print("===============================\n")
+

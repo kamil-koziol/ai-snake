@@ -3,7 +3,24 @@
     "amount_of_elites": 10,
     "amount_of_mutations": 250,
     "amount_of_crossovers": 250,
-    "mutation_rate": 0.05
+    "mutation_rate": 0.05,
+
+    "biases": {
+      "init_mean": 0.0,
+      "init_stdev": 0.0,
+      "max_value": 30.0,
+      "min_value": -30.0,
+      "mutate_power": 0.5,
+      "mutate_rate": 0.7
+    },
+    "weights": {
+      "init_mean": 0.0,
+      "init_stdev": 0.0,
+      "max_value": 30.0,
+      "min_value": -30.0,
+      "mutate_power": 0.5,
+      "mutate_rate": 0.7
+    }
   },
 
   "NN": {

@@ -79,10 +79,13 @@ class Snake:
 
     def handle_apple_collision(self):
         if self.pos == self.apple.pos:
-            self.grow()
-            self.apples_eaten += 1
-            self.apple.set_to_random_position(self.pieces)
-            self.hunger = self.DEFAULT_HUNGER
+            self.on_apple_eat()
+
+    def on_apple_eat(self):
+        self.grow()
+        self.apples_eaten += 1
+        self.apple.set_to_random_position(self.pieces)
+        self.hunger = self.DEFAULT_HUNGER
 
     def update(self):
         if not self.alive:

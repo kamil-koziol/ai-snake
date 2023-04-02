@@ -36,13 +36,13 @@ class NeuralNetwork:
         for i, layer in enumerate(self.layers[1:], 1):
             layer.calculate(self.layers[i - 1].neurons)
 
-    def copy(self) -> NeuralNetwork:
+    def copy(self):
         layers = []
         layers.append(InputLayer(self.layers[0].size, linear))
         for layer in self.layers[1:]:
             layers.append(Layer(layer.size, layer.activation))
 
-        neural_network_copy = NeuralNetwork(layers)
+        neural_network_copy = type(self)(layers)
 
         for i in range(len(self.layers)):
             np.copyto(neural_network_copy.layers[i].weights, self.layers[i].weights)
@@ -50,51 +50,6 @@ class NeuralNetwork:
 
         return neural_network_copy
 
-    def mutate(self, mutation_rate: float):
-        for i in range(1, len(self.layers)):
-            m, n = self.layers[i].weights.shape
-
-            for row in range(m):
-                for col in range(n):
-                    rnd = random.random()
-                    if rnd < mutation_rate:
-                        self.layers[i].weights[row, col] += random.gauss(0, 1)
-
-                        if self.layers[i].weights[row, col] < -1.0:
-                            self.layers[i].weights[row, col] = -1.0
-
-                        if self.layers[i].weights[row, col] > 1.0:
-                            self.layers[i].weights[row, col] = 1.0
-
-            m, n = self.layers[i].biases.shape
-
-            for row in range(m):
-                for col in range(n):
-                    rnd = random.random()
-                    if rnd < mutation_rate:
-                        self.layers[i].biases[row, col] += random.gauss(0, 1)
-
-    def crossover(self, other: NeuralNetwork):
-        for i in range(1, len(self.layers)):
-            m, n = self.layers[i].weights.shape
-
-            randr = random.randint(0, m - 1)
-            randc = random.randint(0, n - 1)
-
-            for row in range(m):
-                for col in range(n):
-                    if row < randr or (row == randr and col <= randc):
-                        self.layers[i].weights[row, col] = other.layers[i].weights[row, col]
-
-            m, n = self.layers[i].biases.shape
-
-            randr = random.randint(0, m - 1)
-            randc = random.randint(0, n - 1)
-
-            for row in range(m):
-                for col in range(n):
-                    if row < randr or (row == randr and col <= randc):
-                        self.layers[i].biases[row, col] = other.layers[i].biases[row, col]
 
     def save(self, filename):
         with open(filename, 'wb') as f:
