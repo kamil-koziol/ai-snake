@@ -22,11 +22,7 @@ DELAY = 0.125
 board = Board(board_size, piece_size)
 
 def tick():
-    snake.update()
-    print("WALLS", snake.rays[0, 0: 8])
-    print("APPLE", snake.rays[0, 8: 16])
-    print("SELF", snake.rays[0, 16:24])
-    print("DIRECTIONS", snake.rays[0, 24:])
+    snake.update(verbose=1)
 
 
 while True:

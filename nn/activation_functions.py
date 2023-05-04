@@ -11,9 +11,11 @@ def softmax(X: np.ndarray) -> np.ndarray:
     e_x = np.exp(X - np.max(X))
     return e_x / e_x.sum()
 
+
 def linear(X: np.ndarray) -> np.ndarray:
     # linear activation doesnt change antyhing
     return X
+
 
 if __name__ == "__main__":
     # relu test

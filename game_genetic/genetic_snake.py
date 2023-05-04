@@ -18,12 +18,12 @@ class GeneticSnake(Snake):
         self.DEFAULT_HUNGER = (board_size * board_size)
         self.history = []
 
-    def update(self):
+    def update(self, verbose=0):
         if not self.alive:
             return
 
         self.predict_move_dir()
-        super().update()
+        super().update(verbose)
 
         self.history.append(self.pos.copy())
 

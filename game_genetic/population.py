@@ -22,7 +22,7 @@ class Population:
     # TODO: LOAD FROM settings.json
 
     def __init__(self, board_size: int, piece_size: int):
-
+        
         self.board_size = board_size
         self.piece_size = piece_size
 
@@ -38,6 +38,13 @@ class Population:
 
             snake = GeneticSnake(self.board_size, self.piece_size, model.copy())
             self.snakes.append(snake)
+
+    def load_settings(self):
+        settings = None
+        with open("settings.json", "r") as f:
+            settings = json.load(f)
+        
+        print(settings)
 
     def update(self):
         snakes_alive = 0
@@ -64,10 +71,16 @@ class Population:
         new_population: List[GeneticSnake] = []
 
         # mutations
-        for i in range(self.N_MUTATION):
+        for i in range(self.N_MUTATION//2):
             rnd_indiv = self.get_random_individual(sum_of_fitnesses)
             new_indiv = GeneticSnake(self.board_size, self.piece_size, rnd_indiv.brain.copy())
-            new_indiv.brain.mutate(0.7, 0.5)
+            new_indiv.brain.mutate(0.2, 0.5)
+            new_population.append(new_indiv)
+
+        for i in range(self.N_MUTATION//2):
+            rnd_indiv = self.get_random_individual(sum_of_fitnesses)
+            new_indiv = GeneticSnake(self.board_size, self.piece_size, rnd_indiv.brain.copy())
+            new_indiv.brain.mutate(0.4, 0.8)
             new_population.append(new_indiv)
 
         # crossovers
@@ -93,6 +106,33 @@ class Population:
 
         self.snakes = new_population
         self.current_generation += 1
+
+
+    def genetic_purge(self):
+        for snake in self.snakes:
+            snake.calculate_fitness()
+
+        sum_of_fitnesses = sum(snake.fitness for snake in self.snakes)
+
+        self.snakes.sort(key=lambda s: s.fitness)
+
+        new_population: List[GeneticSnake] = []
+
+        # mutations
+        for i in range(self.N_POPULATION-self.N_ELITES):
+            rnd_indiv = self.get_random_individual(sum_of_fitnesses)
+            new_indiv = GeneticSnake(self.board_size, self.piece_size, rnd_indiv.brain.copy())
+            new_indiv.brain.mutate(0.8, 1)
+            new_population.append(new_indiv)
+
+        # elitarism
+        for individual in self.snakes[self.N_POPULATION - self.N_ELITES:]:
+            n_indiv = GeneticSnake(self.board_size, self.piece_size, individual.brain.copy())
+            new_population.append(n_indiv)
+
+        self.snakes = new_population
+        self.current_generation += 1
+
 
 
     def draw(self, screen: pg.Surface):

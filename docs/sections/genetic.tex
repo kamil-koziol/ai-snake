@@ -1,0 +1,94 @@
+\section{Genetic algorithm}
+\label{sec:genetic}
+Genetic Algorithm is a machine learning technique that uses principles of natural selection to find the optimal solution to a problem. \\
+
+We can determine how good individual is doing by calculating his fitness.
+
+
+\subsection{Algorithm}
+
+Each of these steps is repeated untill conditions are met and then the current generation value is increased
+
+\subsubsection{Initialization}
+
+The first step is initializing a population using random neural networks, where each solution represents a possible strategy for playing the game. \\
+
+Done only once at the first generation
+
+\subsubsection{Evaluation}
+
+Each solution is evaluated by playing the game using the corresponding neural network. Fitness score of the solution is calculated based on its performance in the game. The fitness score is a measure of how well the solution performs in achieving the objective of the game.
+
+\subsubsection{Selection}
+
+Then propabilities of picking each individual are made. Those propabilities range from $\langle0,1\rangle$
+
+\subsubsection{Mutation}
+
+To introduce diversity into the population, picked by random individuals undergo mutation, where random changes are made to their weights and biases. This process helps to prevent the population from converging too quickly to a local optimum. \\
+
+Every weight and bias has a change of being mutated based on $mutationRate$ \\
+
+If mutated those are modified using this formula:
+\begin{center}
+    $x = x + randomGaussian(initMean,initStdev) * mutationPower$ \\
+\end{center}
+
+Then being kept at $\langle minValue,maxValue \rangle$
+
+\subsubsection{Crossover}
+
+The selected solutions are then combined through crossover, where random pairs of individuals exchange weights and biases of neural network to create new offspring solutions. This process mimics the natural process of sexual reproduction, where genes from two parents combine to produce offspring with a mix of genetic traits.
+
+
+
+\subsubsection{Elites}
+
+Some of the best-performing solutions from the previous generation are also added to the new generation
+
+\subsection{Fitness function}
+
+Fitness function is calculated by this formula:
+
+% self.fitness = 0
+% if self.apples_eaten < 10:
+%     self.fitness = (self.age * self.age) * (2 ** self.apples_eaten)
+% else:
+%     self.fitness = (self.age * self.age) * (2 ** 10) * (self.apples_eaten - 9)
+
+\begin{center}
+    \[ fitness =
+  \begin{cases}
+    age^2 * (2^{apples})       & \quad apples < 10\\
+    age^2 * (2^{10}) * (apples-9)       & \quad apples \geq 10\\
+  \end{cases}
+\]
+\end{center}
+
+Each snake in the game has a hunger variable, denoted as $H$. Upon consumption of an apple, $H$ is replenished to a maximum value of $H_{\max}$. At every time step, $H$ decreases and once it reaches $0$, the snake perishes.
+
+\subsection{Hyperparameters}
+
+Hyperparameters can be modified in file $settings.json$.
+
+
+\subsubsection{Neural network}
+
+Neural network used to train the snakes is described by this model:
+
+
+\begin{center}
+    $Model = $
+    \begin{tabular}{l}
+    $InputLayer(28, linear)$\\
+    $DenseLayer(20, relu)$\\
+    $DenseLayer(12, relu)$\\
+    $OutputLayer(4, softmax)$
+    \end{tabular}
+\end{center}
+
+Description:
+
+\begin{center}
+    $Layer(neurons, activationFunction)$\\
+\end{center}

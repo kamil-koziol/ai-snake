@@ -55,14 +55,14 @@ class Snake:
         self.setup()
 
     def setup(self):
-        self.pos = pg.Vector2(random.randint(0, self.board_size - 1 - self.STARTING_SNAKE_SIZE), random.randint(0, self.board_size - 1 - self.STARTING_SNAKE_SIZE))
+        self.pos = pg.Vector2(random.randint(0, self.board_size - 1 - self.STARTING_SNAKE_SIZE),
+                              random.randint(0, self.board_size - 1 - self.STARTING_SNAKE_SIZE))
         self.pieces = []
         self.pieces.append(self.pos.copy())
 
         self.move_dir = MoveDirection(random.randint(0, len(MoveDirection) - 1))
 
         self.initial_tail_setup(self.move_dir, self.STARTING_SNAKE_SIZE)
-
 
         self.apples_eaten = 0
         self.age = 0
@@ -87,7 +87,7 @@ class Snake:
         self.apple.set_to_random_position(self.pieces)
         self.hunger = self.DEFAULT_HUNGER
 
-    def update(self):
+    def update(self, verbose=0):
         if not self.alive:
             return
 
@@ -103,6 +103,19 @@ class Snake:
         # self.update_rays_binary()
         self.age += 1
 
+        if verbose == 1:
+            print("=" * 8)
+            print(self)
+
+            with np.printoptions(precision=2, suppress=True):
+                print("WALL", self.rays[0, 0: 8])
+                print("APPL", self.rays[0, 8: 16])
+                print("SELF", self.rays[0, 16: 24])
+                print("DIRS", self.rays[0, 24: ])
+
+            print("=" * 8)
+            print()
+
     def pieces_update(self):
         self.pieces.pop()
         self.pieces.insert(0, self.pos.copy())
@@ -114,7 +127,6 @@ class Snake:
         for i in range(size - 1):
             npos += mdir
             self.pieces.append(npos.copy())
-
 
     def grow(self):
         self.pieces.append(self.pieces[-1])
@@ -158,14 +170,15 @@ class Snake:
 
         # TODO: MAKE RELATIVE RAYS TO CURRENT DIRECTION
 
-        DIAG = 1.4
+        DIAG = 1.40
         MAX_DISTANCE = self.board_size * DIAG
         # walls
 
-        self.rays[0, RaysDirections.UP.value] = self.pos.y
-        self.rays[0, RaysDirections.RIGHT.value] = self.board_size - self.pos.x - 1
-        self.rays[0, RaysDirections.DOWN.value] = self.board_size - self.pos.y - 1
-        self.rays[0, RaysDirections.LEFT.value] = self.pos.x
+        self.rays[0, RaysDirections.UP.value] = (self.pos.y)
+        self.rays[0, RaysDirections.RIGHT.value] = (self.board_size - self.pos.x - 1)
+        self.rays[0, RaysDirections.DOWN.value] = (self.board_size - self.pos.y - 1)
+        self.rays[0, RaysDirections.LEFT.value] = (self.pos.x)
+
 
         self.rays[0, RaysDirections.UP_RIGHT.value] = min(self.rays[0, RaysDirections.UP.value],
                                                           self.rays[0, RaysDirections.RIGHT.value]) * DIAG
@@ -175,6 +188,10 @@ class Snake:
                                                            self.rays[0, RaysDirections.LEFT.value]) * DIAG
         self.rays[0, RaysDirections.UP_LEFT.value] = min(self.rays[0, RaysDirections.UP.value],
                                                          self.rays[0, RaysDirections.LEFT.value]) * DIAG
+
+        self.rays[0, RaysDirections.UP.value::2] /= self.board_size
+        self.rays[0, RaysDirections.UP_RIGHT.value::2] /= MAX_DISTANCE
+        self.rays[0, 0:8] = 1 - self.rays[0, 0:8]
 
         # apple
 
@@ -186,6 +203,9 @@ class Snake:
 
         if apple_dir:
             self.rays[0, len(RaysDirections) + apple_dir.value] = diff.magnitude()
+
+        self.rays[0, 8:16] /= MAX_DISTANCE
+        self.rays[0, 8:16] = 1 - self.rays[0, 8:16]
 
         # self
 
@@ -200,10 +220,9 @@ class Snake:
         for direction in range(len(RaysDirections)):
             self.rays[0, len(RaysDirections) * 2 + direction] = smallest[direction]
 
+        self.rays[0, 16:24] /= MAX_DISTANCE
+        self.rays[0, 16:24] = 1 - self.rays[0, 16:24]
 
-        # normalizing
-
-        self.rays /= MAX_DISTANCE
 
         self.rays[0, 24] = 1 if self.move_dir == MoveDirection.UP else 0
         self.rays[0, 25] = 1 if self.move_dir == MoveDirection.RIGHT else 0
@@ -223,7 +242,6 @@ class Snake:
         #     for j in range(len(RaysDirections)):
         #         self.rays[0, i * len(RaysDirections) + j] = tmp_rays[j]
 
-
     def update_rays_binary(self):
 
         DIAG = 1.4
@@ -233,15 +251,14 @@ class Snake:
         for i in range(len(RaysDirections)):
             smallest = 1
             for j in range(3):
-                if self.rays[0, len(RaysDirections)*j + i] <= smallest:
-                    smallest = self.rays[0, len(RaysDirections)*j + i]
+                if self.rays[0, len(RaysDirections) * j + i] <= smallest:
+                    smallest = self.rays[0, len(RaysDirections) * j + i]
 
             for j in range(3):
-                if self.rays[0, len(RaysDirections)*j + i] == smallest:
-                    self.rays[0, len(RaysDirections)*j + i] = 1
+                if self.rays[0, len(RaysDirections) * j + i] == smallest:
+                    self.rays[0, len(RaysDirections) * j + i] = 1
                 else:
-                    self.rays[0, len(RaysDirections)*j + i] = 0
-
+                    self.rays[0, len(RaysDirections) * j + i] = 0
 
     def get_direction_between_vectors(self, vec1: pg.Vector2, vec2: pg.Vector2) -> Optional[RaysDirections]:
         diff = (vec2 - vec1)
@@ -299,4 +316,3 @@ class Snake:
 
     def restart(self):
         self.setup()
-

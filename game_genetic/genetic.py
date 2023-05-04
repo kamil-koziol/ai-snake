@@ -31,6 +31,10 @@ while True:
         if event.type == pg.QUIT:
             sys.exit()
 
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_SPACE:
+                population.genetic_purge()
+
     # updates
     if counter >= DELAY:
         tick()

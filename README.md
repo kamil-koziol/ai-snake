@@ -14,10 +14,10 @@ which can be used when making bots that play games
 
 ## Recommended
 
-You need to have [pipenv](https://pipenv-fork.readthedocs.io/en/latest/) to run this project
+Use [conda](https://docs.conda.io/en/latest/) for running project.
 
 ```
-pipenv run python3 main.py
+conda create --name <env> --file requirements.txt
 ```
 
 ## Other
