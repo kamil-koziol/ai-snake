@@ -1,18 +1,32 @@
-from game import Snake, MoveDirection
 import numpy as np
-from game_genetic import NeuralNetwork
+
+from nn import NeuralNetwork
+from game import Snake, MoveDirection
+from nn.activation_functions import linear, softmax
+from nn.layer import InputLayer, Layer
 
 
 class DeepQAgent:
     agentNetwork: NeuralNetwork
     #memory: 
-    def __init__(self, epochs, epoch_size) -> None:
+    def __init__(self, epochs, epoch_size, board_size, piece_size) -> None:
         self.epochs = epochs
         self.epoch_size = epoch_size
-
+        
+        # TODO parametrize
+        self.gamma = 0.9
         self.epsilon = 1
         
-        self.game = DeepQSnake()
+        self.agentNetwork = NeuralNetwork([
+                InputLayer(28, linear),
+                Layer(4, softmax)
+            ])
+
+
+        self.board_size = board_size 
+        self.piece_size = piece_size
+
+        self.game = DeepQSnake(board_size, piece_size)
         self.current_state = self.game.get_state()
 
         pass
@@ -25,11 +39,12 @@ class DeepQAgent:
                 rand = np.random.uniform(0, 1)
                 if(rand < self.epsilon):
                     # random MoveDirection - explore
-                    action = np.random.randint(0, 3)
+                    action = MoveDirection(np.random.randint(0, 3))
+                
                 else:
                     # predict MoveDirection - exploit
                     action = self.agentNetwork.predict(self.current_state)
-                    action = np.argmax(action)
+                    action = MoveDirection(np.argmax(action))
  
                 next_state, reward, done = self.game.step(action)
 
@@ -44,6 +59,9 @@ class DeepQAgent:
                     self.game.restart()
                     self.current_state = self.game.get_state()
 
+            # decrease epsilon
+            self.epsilon = self.epsilon * 0.9
+        
     def train_step(self, state, action, reward, next_state, done):
         # calculate target
         if done:
@@ -51,13 +69,16 @@ class DeepQAgent:
         else:
             q_target_for_action = reward + self.gamma * np.max(self.agentNetwork.predict(next_state))
         
+        #TODO: change when network added
         prediction = self.agentNetwork.predict(state)
+        
         target = prediction
-        target[action] = q_target_for_action
+        target[0][action.value] = q_target_for_action
 
         # train network
-        loss = loss(target, prediction)
-        self.agentNetwork.backward(prediction, target, loss)
+        loss = self.loss(target, prediction)
+        #TODO:
+        #self.agentNetwork.backward(prediction, target, loss)
 
 
         return
@@ -65,23 +86,43 @@ class DeepQAgent:
 
     def loss (self, target, prediction):
         return np.sum(np.square(target - prediction))
+    
 
 class DeepQSnake(Snake):
+    def __init__(self, board_size, piece_size, hunger_enabled=False):
+        super().__init__(board_size, piece_size, hunger_enabled)
 
 
     def get_state(self):
         return self.rays
+    
+    def is_alive(self):
+        return self.alive
+    
+    def get_score(self):
+        return self.apples_eaten
 
     def step(self, action):
-        # set move_dir
+        score_before = self.get_score()
         self.set_move_dir(action)
-        
+
         super().update()
-        # After
+        
+        apple_eaten = self.get_score() > score_before
 
         # check if game is over
-        done = False
+        done = self.is_alive()
 
         # calculate reward
-        reward = 0
+        reward = (apple_eaten * 10) + (done * -100)
+
         return self.get_state(), reward, done
+    
+
+if __name__ == "__main__":
+    epochs = 10
+    epoch_size = 1000
+    
+    agent = DeepQAgent(epochs, epoch_size, 20, 40)
+    agent.train()
+    
