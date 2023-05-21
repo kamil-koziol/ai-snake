@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 
 .DS_Store
+/Miniconda3-latest-Linux-x86_64.sh
+/data.csv
