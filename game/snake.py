@@ -9,6 +9,7 @@ from enum import Enum
 
 from game import Apple, Block
 import numpy as np
+import pandas as pd
 
 
 class MoveDirection(Enum):
@@ -47,7 +48,8 @@ class Snake:
     DEFAULT_HUNGER = 200
     STARTING_SNAKE_SIZE = 3
 
-    def __init__(self, board_size, piece_size, hunger_enabled=False):
+    def __init__(self, board_size, piece_size, hunger_enabled=False, print_to_file=False):
+        self.print_to_file = print_to_file
         self.piece_size = piece_size
         self.board_size = board_size
         self.hunger_enabled = hunger_enabled
@@ -111,7 +113,7 @@ class Snake:
                 print("WALL", self.rays[0, 0: 8])
                 print("APPL", self.rays[0, 8: 16])
                 print("SELF", self.rays[0, 16: 24])
-                print("DIRS", self.rays[0, 24: ])
+                print("DIRS", self.rays[0, 24:])
 
             print("=" * 8)
             print()
@@ -148,6 +150,16 @@ class Snake:
 
         self.apple.draw(screen)
 
+    def print_data(self, move_dir: MoveDirection):
+
+        if self.print_to_file:
+
+            data =self.rays[0]
+            data_with_move_dir = np.append(data, move_dir.value)
+
+            df = pd.DataFrame( np.expand_dims(data_with_move_dir, axis=0))
+            df.to_csv('data.csv', mode='a', sep=';', index=False, header=False)
+
     def handle_event(self, event: pg.event.Event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
@@ -178,7 +190,6 @@ class Snake:
         self.rays[0, RaysDirections.RIGHT.value] = (self.board_size - self.pos.x - 1)
         self.rays[0, RaysDirections.DOWN.value] = (self.board_size - self.pos.y - 1)
         self.rays[0, RaysDirections.LEFT.value] = (self.pos.x)
-
 
         self.rays[0, RaysDirections.UP_RIGHT.value] = min(self.rays[0, RaysDirections.UP.value],
                                                           self.rays[0, RaysDirections.RIGHT.value]) * DIAG
@@ -222,7 +233,6 @@ class Snake:
 
         self.rays[0, 16:24] /= MAX_DISTANCE
         self.rays[0, 16:24] = 1 - self.rays[0, 16:24]
-
 
         self.rays[0, 24] = 1 if self.move_dir == MoveDirection.UP else 0
         self.rays[0, 25] = 1 if self.move_dir == MoveDirection.RIGHT else 0
@@ -312,6 +322,7 @@ class Snake:
         if self.move_dir == MoveDirection.RIGHT and move_dir == MoveDirection.LEFT:
             return
 
+        self.print_data(move_dir)
         self.move_dir = move_dir
 
     def restart(self):

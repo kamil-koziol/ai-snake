@@ -2,17 +2,19 @@ import sys
 import pygame as pg
 from time import sleep
 from game import Snake, Apple, Board
+from game_supervised_classification.classification_snake import SupervisedClassificationSnake
+from game_supervised_classification.supervised_cassification_Network import SupervisedNeuralNetwork
 
 pg.init()
 
 size = WIDTH, HEIGHT = 800, 800
 screen = pg.display.set_mode(size)
-pg.display.set_caption('Snake')
 
 board_size = 20
 piece_size = WIDTH // board_size
 
-snake = Snake(board_size, piece_size,print_to_file=True)
+model = SupervisedNeuralNetwork()
+snake = SupervisedClassificationSnake(board_size, piece_size, model)
 
 FRAME_RATE = 60
 clock = pg.time.Clock()
@@ -31,17 +33,14 @@ while True:
         if event.type == pg.QUIT:
             sys.exit()
 
-        snake.handle_event(event)
-
-        if event.type == pg.KEYDOWN:
-            tick()
 
     # updates
     if counter >= DELAY:
-        # tick()
+        tick()
 
         counter = 0
-
+    if not snake.alive:
+        snake = SupervisedClassificationSnake(board_size, piece_size, model)
     # drawing
     screen.fill(pg.color.THECOLORS["black"])
 
