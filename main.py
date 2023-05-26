@@ -7,6 +7,7 @@ pg.init()
 
 size = WIDTH, HEIGHT = 800, 800
 screen = pg.display.set_mode(size)
+pg.display.set_caption('Snake')
 
 board_size = 20
 piece_size = WIDTH // board_size
