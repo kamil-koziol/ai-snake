@@ -6,58 +6,67 @@ from nn import NeuralNetwork
 from game_deepq import DeepQAgent
 from game_deepq.deepq_agent import DeepQSnake
 import numpy as np
+import torch
 
-pg.init()
 
-size = WIDTH, HEIGHT = 800, 800
-screen = pg.display.set_mode(size)
-
-board_size = 20
-piece_size = WIDTH // board_size
-
-epochs = 10
-epoch_size = 1000
-agent = DeepQAgent(epochs, epoch_size, board_size, piece_size)
-
-agent.train()
-
-num_games = 10000
-for game in range(num_games):
-    snake = DeepQSnake(board_size, piece_size)
-    snake.current_state = snake.get_state()
-
-    FRAME_RATE = 60
+def play_game(num_tries, game_num, screen, board_size, piece_size):
+    board = Board(board_size, piece_size)
     clock = pg.time.Clock()
-    dt: float = 0.0
     counter: float = 0.0
-    DELAY = 0.125
+    dt: float = 0.0
+    game = DeepQSnake(board_size, piece_size)
 
-    while snake.is_alive():
-        board = Board(board_size, piece_size)
+    print (f"Game {game_num + 1}:")
+    for try_num in range(num_tries):
+        while True:
 
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                sys.exit()
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    sys.exit()
 
-            snake.handle_event(event)
+            # updates
+            if counter >= DELAY:
+                state = game.get_state()
+                q_values = agent.predict(state)
+                best_action = torch.argmax(q_values).item()
+                game.step(best_action)
 
-        if counter >= DELAY:
-            action = agent.agentNetwork.predict(snake.current_state)
-            action = MoveDirection(np.argmax(action))
-            next_state, reward, done = snake.step(action)
-            snake.current_state = next_state
-            counter = 0
+                counter = 0
 
-        screen.fill(pg.color.THECOLORS["black"])
+            # drawing
+            screen.fill(pg.color.THECOLORS["black"])
 
-        board.draw(screen)
+            board.draw(screen)
+            game.draw(screen)
 
-        snake.draw(screen)
+            pg.display.flip()
+            dt = clock.tick(FRAME_RATE) / 1000.0
+            counter += dt
 
-        pg.display.flip()
-        dt = clock.tick(FRAME_RATE) / 1000.0
-        counter += dt
+            if not game.is_alive():
+                print(f"\tTry {try_num + 1}: Score = {game.get_score()}")
+                game.restart()
+                break
 
-    print(f"Game {game+1}: Score = {snake.get_score()}")
 
-print("All games completed")
+if __name__ == "__main__":
+    size = WIDTH, HEIGHT = 800, 800
+    screen = pg.display.set_mode(size)
+    FRAME_RATE = 60
+    DELAY = 0.01
+    pg.init()
+
+    board_size = 20
+    piece_size = WIDTH // board_size
+
+    epochs = 10000
+    epoch_size = 1000
+
+    agent = DeepQAgent(epochs, epoch_size, board_size, piece_size, lr=0.01)
+
+
+    def after_epoch_callback(epoch_num):
+        play_game(1, epoch_num, screen, board_size, piece_size)
+
+
+    agent.train(after_epoch_callback=after_epoch_callback)
