@@ -6,11 +6,8 @@ def relu(X: np.ndarray) -> np.ndarray:
     return np.maximum(0, X)
 
 def softmax(X: np.ndarray) -> np.ndarray:
-    # rozklad prawdopodobienstwa
-    # !! - nie zrobilem implementacji safe numerical
     e_x = np.exp(X - np.max(X))
     return e_x / e_x.sum()
-
 
 def linear(X: np.ndarray) -> np.ndarray:
     # linear activation doesnt change antyhing

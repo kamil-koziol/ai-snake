@@ -3,14 +3,13 @@ from typing import List, Callable
 import numpy as np
 
 from nn.activation_functions import linear
-
-
 class Layer:
     size: int
     activation: Callable
     weights: np.ndarray
     biases: np.ndarray
     neurons: np.ndarray
+    delta: np.ndarray
 
     def __init__(self, size: int, activation: Callable):
         self.size = size
