@@ -1,6 +1,7 @@
 import sys
 
-import pygame
+sys.path.append('../ai-snake')
+
 import pygame as pg
 from time import sleep
 from game import Snake, MoveDirection, Board
@@ -14,6 +15,9 @@ board_size = 20
 piece_size = WIDTH // board_size
 
 snake = Snake(board_size, piece_size)
+snake.pos.x = 0
+snake.pos.y = 0
+snake.move_dir = MoveDirection.RIGHT
 
 FRAME_RATE = 60
 clock = pg.time.Clock()

@@ -103,7 +103,8 @@ class Snake:
         self.handle_walls()
         self.handle_self_collision()
         self.handle_apple_collision()
-        self.handle_hunger()
+        if self.hunger_enabled:
+            self.handle_hunger()
 
         self.update_rays(relative_dir=relative_dir)
         # self.update_rays_binary()

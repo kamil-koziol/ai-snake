@@ -1,5 +1,7 @@
 import sys
 
+sys.path.append('../ai-snake')
+
 import pygame as pg
 from game import Snake, Board, MoveDirection
 from typing import List, Tuple
