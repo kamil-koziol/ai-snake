@@ -132,3 +132,4 @@ dmypy.json
 .DS_Store
 /Miniconda3-latest-Linux-x86_64.sh
 /data.csv
+/game_supervised_classification/seed.txt

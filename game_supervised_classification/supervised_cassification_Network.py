@@ -15,13 +15,13 @@ class SupervisedNeuralNetwork:
 
         model = tf.keras.Sequential([
             tf.keras.layers.Input(shape=(28,)),
-            tf.keras.layers.Dense(units=28, activation='relu'),
-            tf.keras.layers.Dense(units=16, activation='relu'),
-            tf.keras.layers.Dense(units=4, activation="softmax")
+            tf.keras.layers.Dense(units=64, activation='relu'),
+            tf.keras.layers.Dense(units=32, activation='relu'),
+            tf.keras.layers.Dense(units=4, activation="linear")
         ])
 
         model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
-                      loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                      loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                       metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
 
         model.summary()
