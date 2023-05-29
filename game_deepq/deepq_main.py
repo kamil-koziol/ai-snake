@@ -4,7 +4,7 @@ from time import sleep
 from game import Snake, Apple, Board, MoveDirection
 from nn import NeuralNetwork
 from game_deepq import DeepQAgent
-from game_deepq.deepq_agent import DeepQSnake
+from game_deepq.deepq_agent import DeepQSnake, DeepQAgentConfig
 import numpy as np
 import torch
 
@@ -59,14 +59,30 @@ if __name__ == "__main__":
     board_size = 20
     piece_size = WIDTH // board_size
 
-    epochs = 10000
-    epoch_size = 1000
+    config = DeepQAgentConfig(
+        board_size=board_size,
+        piece_size=piece_size,
+        epochs=10000,
+        epoch_size=1000,
+        game_steps_per_epoch=1000,
 
-    agent = DeepQAgent(epochs, epoch_size, board_size, piece_size, lr=0.01)
+        epsilon_decay=0.95,
+        epsilon_min=0.01,
+        gamma=0.95,
 
+        lr=0.01,
+        batch_size=64,
+        memory_size=10000,
+
+        dataloader_shuffle=True,
+        dataloader_num_workers=0,
+
+        hidden_sizes=[256, 512, 256]
+    )
+
+    agent = DeepQAgent(config)
 
     def after_epoch_callback(epoch_num):
         play_game(1, epoch_num, screen, board_size, piece_size)
-
 
     agent.train(after_epoch_callback=after_epoch_callback)
