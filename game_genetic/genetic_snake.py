@@ -1,5 +1,7 @@
 from typing import List
 
+import sys
+sys.path.append('../ai-snake')
 import numpy as np
 
 from game import Snake, MoveDirection

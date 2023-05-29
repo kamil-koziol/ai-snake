@@ -102,7 +102,7 @@ class Population:
         if verbose:
             self.print_generational_summary()
 
-        self.snakes[-1].brain.save("brains/brain" + str(self.current_generation) + "_" + str(max(self.snakes, key=lambda x: x.fitness).fitness) + ".npy")
+        self.snakes[-1].brain.save("game_genetic/brains/brain" + str(self.current_generation) + "_" + str(max(self.snakes, key=lambda x: x.fitness).fitness) + ".npy")
 
         self.snakes = new_population
         self.current_generation += 1

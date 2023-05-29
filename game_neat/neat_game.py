@@ -1,5 +1,8 @@
 import random
 import sys
+
+sys.path.append('../ai-snake')
+
 from typing import List
 import os
 
@@ -109,7 +112,7 @@ def run(config_file: str):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(5, filename_prefix = "checkpoints2/neat-checkpoint-"))
+    p.add_reporter(neat.Checkpointer(5, filename_prefix = "game_neat/checkpoints2/neat-checkpoint-"))
 
     # p = neat.Checkpointer.restore_checkpoint('checkpoints/neat-checkpoint-1999')
     # Run for up to 300 generations.
@@ -157,7 +160,7 @@ def main_best(genomes, config):
                     snakes[i].calculate_fitness()
                     ge[i].fitness = snakes[i].fitness
 
-                with open("seeds.txt", 'a') as f:
+                with open("game_neat/seeds.txt", 'a') as f:
                     f.write(f"apples = {snakes[0].apples_eaten}\n")
                 print(snakes[0].apples_eaten)
                 return
@@ -178,7 +181,7 @@ def main_best(genomes, config):
 def start(p, seed):
     print(f"seed = {seed}, ", end="")
 
-    with open("seeds.txt", 'a') as f:
+    with open("game_neat/seeds.txt", 'a') as f:
         f.write(f"seed = {seed}, ")
     np.random.seed(seed)
     random.seed(seed)
@@ -205,5 +208,5 @@ if __name__ == "__main__":
     screen = pg.display.set_mode(size)
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, "config")
-    run(config_path) # for training
-    # run_best_individual("checkpoints/neat-checkpoint-1677", 706, 758141, config_path)
+    # run(config_path) # for training
+    run_best_individual("game_neat/checkpoints/neat-checkpoint-1677", 706, 758141, config_path)

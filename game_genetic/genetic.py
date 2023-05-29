@@ -1,4 +1,6 @@
 import sys
+sys.path.append('../ai-snake')
+
 from typing import List
 
 import pygame as pg
