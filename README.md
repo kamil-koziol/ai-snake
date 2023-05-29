@@ -69,10 +69,10 @@ Model:
 1.
 
 Pros:
-1.
+1. Simple implementation
 
 Cons:
-1.
+1. Collecting data
 
 ## NEAT
 
