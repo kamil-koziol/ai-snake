@@ -20,7 +20,7 @@ FRAME_RATE = 60
 clock = pg.time.Clock()
 dt: float = 0.0
 counter: float = 0.0
-DELAY = 0.125
+DELAY = 0.0
 
 board = Board(board_size, piece_size)
 
@@ -40,6 +40,9 @@ while True:
 
         counter = 0
     if not snake.alive:
+        with open("seed.txt", "a") as f:
+            f.write("EATEN:" + str(snake.apples_eaten) + "\n")
+
         snake = SupervisedClassificationSnake(board_size, piece_size, model)
     # drawing
     screen.fill(pg.color.THECOLORS["black"])
