@@ -7,11 +7,12 @@ pg.init()
 
 size = WIDTH, HEIGHT = 800, 800
 screen = pg.display.set_mode(size)
+pg.display.set_caption('Snake')
 
 board_size = 20
 piece_size = WIDTH // board_size
 
-snake = Snake(board_size, piece_size)
+snake = Snake(board_size, piece_size,print_to_file=True)
 
 FRAME_RATE = 60
 clock = pg.time.Clock()

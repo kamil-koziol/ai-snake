@@ -1,5 +1,69 @@
 \section{NEAT}
 \label{sec:neat}
-We have now added a title, author and date to our first \LaTeX{} document!
-\subsection{Podsekcja}
-ziut
+
+NEAT - Neuroevolution of Augmenting topologies. Genetic algorithm based on real life evolution and fitness function \\
+
+NEAT aims to evolve both the weights and structures of neural networks, allowing them to grow and become more complex over time. Unlike traditional approaches that fix the network structure and only optimize the weights, NEAT evolves the topology of the network, including the addition and removal of nodes and connections.
+
+\subsection{Neural networks}
+
+Neural networks in NEAT aren't static (not including input and output) and they are also evolving with each individual
+
+\subsection{General steps}
+
+\begin{enumerate}
+    \item Initialization
+    \item Fitness evaluation
+    \item Reproduction
+    \item Crossover
+    \item Mutation
+    \item Speciation
+\end{enumerate}
+
+\subsection{Initialization}
+
+The algorithm starts by creating a population of initial neural networks. These networks are small and simple, with minimal or no connections.
+
+\subsection{Fitness evaluation}
+
+Each neural network in the population is evaluated for its performance on a specific task or problem. This is done by providing inputs to the network, letting it process the inputs, and obtaining the outputs. The fitness function determines how well the network performs and assigns a fitness score accordingly.
+
+\subsubsection{Fitness function}
+
+\begin{lstlisting}[language=Python]
+
+fitness = 0
+
+fitness += apples_eaten * 500
+
+if crashed_to_wall or crashed_to_self:
+    fitness /= 2
+
+if died_from_hunger:
+    fitness -= 250
+
+\end{lstlisting}
+
+\subsection{Mutations}
+
+There are 3 types of mutations:
+
+\begin{enumerate}
+    \item New connection between nodes
+    \item Changing weight of a connection
+    \item Inserting new node between two connected nodes 
+\end{enumerate}
+
+Mutation helps explore new areas of the search space and prevent premature convergence.
+
+\subsection{Speciation}
+
+NEAT introduces a speciation mechanism to maintain diversity in the population. It groups similar networks into species based on their structural similarity. Networks that are in the same species can compete and mate with each other, while networks from different species are protected from excessive competition.
+
+\subsection{Seed}
+
+Through observation it was found that random seed that the snake has started in could highly affect snake's performance. To solve this issue genome evaluation was done at 5 random seeds. The best fitness scored across these seeds was chosen as current generation genome's fitness.
+
+\subsection{Summary}
+
+After 1000+ generations of evolution, the algorithm produced a highly successful snake that consumed over 60 apples in a single gameplay session.The neural network controlling the snake's movements grew and adapted its structure over time, optimizing decision-making and navigation. This achievement demonstrates NEAT's effectiveness in evolving intelligent agents for complex tasks and showcases its potential for gaming and real-world applications.

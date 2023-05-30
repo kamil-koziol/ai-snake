@@ -9,6 +9,7 @@ from enum import Enum
 
 from game import Apple, Block
 import numpy as np
+import pandas as pd
 
 
 class MoveDirection(Enum):
@@ -47,7 +48,9 @@ class Snake:
     DEFAULT_HUNGER = 200
     STARTING_SNAKE_SIZE = 3
 
-    def __init__(self, board_size, piece_size, hunger_enabled=False):
+    def __init__(self, board_size, piece_size, hunger_enabled=False, print_to_file=False):
+        self.print_to_file = print_to_file
+
         self.piece_size = piece_size
         self.board_size = board_size
         self.hunger_enabled = hunger_enabled
@@ -70,6 +73,9 @@ class Snake:
         self.rays = np.zeros((1, 28))
         self.alive = True
         self.hunger = Snake.DEFAULT_HUNGER
+        self.crashed_to_self = False
+        self.crashed_to_wall = False
+
         self.update_rays()
 
     def set_new_apple(self):
@@ -87,7 +93,7 @@ class Snake:
         self.apple.set_to_random_position(self.pieces)
         self.hunger = self.DEFAULT_HUNGER
 
-    def update(self, verbose=0):
+    def update(self, verbose=0, relative_dir = False):
         if not self.alive:
             return
 
@@ -97,9 +103,10 @@ class Snake:
         self.handle_walls()
         self.handle_self_collision()
         self.handle_apple_collision()
-        self.handle_hunger()
+        if self.hunger_enabled:
+            self.handle_hunger()
 
-        self.update_rays()
+        self.update_rays(relative_dir=relative_dir)
         # self.update_rays_binary()
         self.age += 1
 
@@ -111,7 +118,7 @@ class Snake:
                 print("WALL", self.rays[0, 0: 8])
                 print("APPL", self.rays[0, 8: 16])
                 print("SELF", self.rays[0, 16: 24])
-                print("DIRS", self.rays[0, 24: ])
+                print("DIRS", self.rays[0, 24:])
 
             print("=" * 8)
             print()
@@ -148,6 +155,16 @@ class Snake:
 
         self.apple.draw(screen)
 
+    def print_data(self, move_dir: MoveDirection):
+
+        if self.print_to_file:
+
+            data =self.rays[0]
+            data_with_move_dir = np.append(data, move_dir.value)
+
+            df = pd.DataFrame( np.expand_dims(data_with_move_dir, axis=0))
+            df.to_csv('data.csv', mode='a', sep=';', index=False, header=False)
+
     def handle_event(self, event: pg.event.Event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
@@ -162,11 +179,12 @@ class Snake:
     def handle_walls(self):
         if self.pos.x < 0 or self.pos.x > self.board_size - 1 or self.pos.y < 0 or self.pos.y > self.board_size - 1:
             self.die()
+            self.crashed_to_wall = True
 
     def die(self):
         self.alive = False
 
-    def update_rays(self):
+    def update_rays(self, relative_dir=False):
 
         # TODO: MAKE RELATIVE RAYS TO CURRENT DIRECTION
 
@@ -178,7 +196,6 @@ class Snake:
         self.rays[0, RaysDirections.RIGHT.value] = (self.board_size - self.pos.x - 1)
         self.rays[0, RaysDirections.DOWN.value] = (self.board_size - self.pos.y - 1)
         self.rays[0, RaysDirections.LEFT.value] = (self.pos.x)
-
 
         self.rays[0, RaysDirections.UP_RIGHT.value] = min(self.rays[0, RaysDirections.UP.value],
                                                           self.rays[0, RaysDirections.RIGHT.value]) * DIAG
@@ -223,7 +240,6 @@ class Snake:
         self.rays[0, 16:24] /= MAX_DISTANCE
         self.rays[0, 16:24] = 1 - self.rays[0, 16:24]
 
-
         self.rays[0, 24] = 1 if self.move_dir == MoveDirection.UP else 0
         self.rays[0, 25] = 1 if self.move_dir == MoveDirection.RIGHT else 0
         self.rays[0, 26] = 1 if self.move_dir == MoveDirection.DOWN else 0
@@ -231,16 +247,17 @@ class Snake:
 
         # rotate rays to relative direction
 
-        # movement = -self.move_dir.value*2
-        #
-        # for i in range(3):
-        #     tmp_rays = np.zeros(len(RaysDirections))
-        #
-        #     for j in range(len(RaysDirections)):
-        #         tmp_rays[(j + movement) % len(RaysDirections)] = self.rays[0, i*len(RaysDirections) + j]
-        #
-        #     for j in range(len(RaysDirections)):
-        #         self.rays[0, i * len(RaysDirections) + j] = tmp_rays[j]
+        if relative_dir:
+            movement = -self.move_dir.value*2
+
+            for i in range(3):
+                tmp_rays = np.zeros(len(RaysDirections))
+
+                for j in range(len(RaysDirections)):
+                    tmp_rays[(j + movement) % len(RaysDirections)] = self.rays[0, i*len(RaysDirections) + j]
+
+                for j in range(len(RaysDirections)):
+                    self.rays[0, i * len(RaysDirections) + j] = tmp_rays[j]
 
     def update_rays_binary(self):
 
@@ -295,6 +312,7 @@ class Snake:
     def handle_self_collision(self):
         if self.pos in self.pieces[1:]:
             self.die()
+            self.crashed_to_self = True
 
     def handle_hunger(self):
         self.hunger -= 1
@@ -312,6 +330,7 @@ class Snake:
         if self.move_dir == MoveDirection.RIGHT and move_dir == MoveDirection.LEFT:
             return
 
+        self.print_data(move_dir)
         self.move_dir = move_dir
 
     def restart(self):

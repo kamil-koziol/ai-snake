@@ -1,5 +1,28 @@
 \section{Supervised Classification}
 \label{sec:supervised_classification}
-We have now added a title, author and date to our first \LaTeX{} document!
-\subsection{Podsekcja}
-ziut
+The objective of this report is to outline implementation of supervised classification methods for the game Snake. By using a dataset of pre-labeled game states and employing machine learning algorithms, aim was to create a snake-playing agent capable of making informed decisions to achieve higher scores. This report presents the methodology, results, and analysis of our approach, highlighting the effectiveness and potential of supervised classification in the context of gaming applications.
+\subsection{Implementation}
+In the project, the TensorFlow library was used to implement supervised classification
+
+\subsection{Data}
+The dataset used in this project consists of gameplay data recorded from our own gameplay sessions. By capturing and labeling the game states during our playthroughs of Snake, we created a dataset specifically suited for our implementation. This approach allows us to train our supervised classification models using real gameplay scenarios. Leveraging our own gameplay data adds an element of authenticity and enables us to develop a snake-playing agent that can perform well in similar gameplay conditions.
+
+The dataset used in this project comprises 28 parameters, specifically rays that measure distances. These parameters are categorized into four groups: the first eight represent distances from walls, the next eight represent distances from the apple, the next eight are distances to the snake's own body, and the remaining four values indicate the direction of movement.
+
+\subsection{Neural network}
+Neural network used to train the snakes is described by this model:
+\begin{center}
+    $Model = $
+    \begin{tabular}{l}
+    $InputLayer(28, linear)$\\
+    $DenseLayer(64, relu)$\\
+    $DenseLayer(32, relu)$\\
+    $OutputLayer(4, softmax)$
+    \end{tabular}
+\end{center}
+
+\subsection{Performance}
+The effectiveness of the agent is primarily influenced by two factors: the quantity of data available for training and the skills of the players on whose gameplay sessions the agent was trained. A larger dataset provides the agent with a wider range of scenarios to learn from, enabling it to make more accurate decisions. Additionally, the agent's performance is closely linked to the skills and strategies exhibited by the players whose gameplay sessions were utilized for training, as the agent learns from their patterns and behaviors. When players did not use any specialised techniques, or patterns, the bahaviour of the agent seemed to be a bit chaotic.
+
+\subsection{Summary}
+In conclusion, the implementation of supervised classification techniques using the TensorFlow library has proven effective in enhancing the gameplay of the Snake game. By leveraging a dataset consisting of labeled gameplay data, the agent demonstrates the ability to make decisions, resulting in improved performance and higher scores. Furthermore, utilizing player-based data contributes to a more natural and human-like pattern of movement, distinguishing it from other learning methods like genetic algorithms. However, the main limitation lies in the quantity and quality of the training data. Incorporating data from various players with different playing styles can lead to suboptimal decisions by the agent.

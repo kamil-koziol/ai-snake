@@ -1,11 +1,9 @@
 import sys
-sys.path.append('../ai-snake')
-
-from typing import List
-
 import pygame as pg
-from game import Snake, Apple, Board, MoveDirection
-from game_genetic import Population
+from time import sleep
+from game import Snake, Apple, Board
+from game_supervised_classification.classification_snake import SupervisedClassificationSnake
+from game_supervised_classification.supervised_cassification_Network import SupervisedNeuralNetwork
 
 pg.init()
 
@@ -15,17 +13,19 @@ screen = pg.display.set_mode(size)
 board_size = 20
 piece_size = WIDTH // board_size
 
+model = SupervisedNeuralNetwork()
+snake = SupervisedClassificationSnake(board_size, piece_size, model)
+
 FRAME_RATE = 60
 clock = pg.time.Clock()
 dt: float = 0.0
 counter: float = 0.0
-DELAY = 0.01
+DELAY = 0.0
 
 board = Board(board_size, piece_size)
-population = Population(board_size, piece_size)
 
 def tick():
-    population.update()
+    snake.update(verbose=1)
 
 
 while True:
@@ -33,22 +33,23 @@ while True:
         if event.type == pg.QUIT:
             sys.exit()
 
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_SPACE:
-                population.genetic_purge()
 
     # updates
     if counter >= DELAY:
         tick()
 
         counter = 0
+    if not snake.alive:
+        with open("seed.txt", "a") as f:
+            f.write("EATEN:" + str(snake.apples_eaten) + "\n")
 
+        snake = SupervisedClassificationSnake(board_size, piece_size, model)
     # drawing
     screen.fill(pg.color.THECOLORS["black"])
 
     board.draw(screen)
-    population.draw(screen)
 
+    snake.draw(screen)
 
     pg.display.flip()
     dt = clock.tick(FRAME_RATE) / 1000.0
