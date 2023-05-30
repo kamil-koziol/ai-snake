@@ -8,6 +8,8 @@ from game_deepq.deepq_agent import DeepQSnake, DeepQAgentConfig
 import numpy as np
 import torch
 
+import matplotlib.pyplot as plt
+
 
 def play_game(num_tries, game_num, screen, board_size, piece_size):
     board = Board(board_size, piece_size)
@@ -50,39 +52,70 @@ def play_game(num_tries, game_num, screen, board_size, piece_size):
 
 
 if __name__ == "__main__":
+    print(f"CUDA: {torch.cuda.is_available()}")
+
     size = WIDTH, HEIGHT = 800, 800
     screen = pg.display.set_mode(size)
     FRAME_RATE = 60
     DELAY = 0.01
     pg.init()
 
-    board_size = 20
+    board_size = 7
     piece_size = WIDTH // board_size
 
     config = DeepQAgentConfig(
         board_size=board_size,
         piece_size=piece_size,
-        epochs=10000,
-        epoch_size=1000,
-        game_steps_per_epoch=1000,
 
-        epsilon_decay=0.95,
+        epochs=1000,
+        epoch_steps=1024 * 40 / 1024,
+
+        game_steps_per_epoch=1024 * 4,
+        memory_size=1024 * 100,
+
+
+        epsilon_decay=0.999,
         epsilon_min=0.01,
-        gamma=0.95,
+        gamma=0.9,
 
-        lr=0.01,
-        batch_size=64,
-        memory_size=10000,
+        lr=0.0005,
+        batch_size=1024,
 
         dataloader_shuffle=True,
         dataloader_num_workers=0,
 
-        hidden_sizes=[256, 512, 256]
+        hidden_sizes=[512],
+        device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     )
 
     agent = DeepQAgent(config)
 
-    def after_epoch_callback(epoch_num):
-        play_game(1, epoch_num, screen, board_size, piece_size)
+    losses = []
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_xlabel('Epoch')
+    ax.set_ylabel('Loss')
+    ax.set_xlim(0, 1)
+    ax.set_yscale('log')
+    line, = ax.plot(losses)
+
+
+
+    def after_epoch_callback(epoch_num, loss, epsilon):
+        # draw loss on plot
+        print(f"Epoch {epoch_num}\n\tLoss = {loss}\n\tEpsilon = {epsilon}")
+        losses.append(loss)
+
+        line.set_ydata(losses)
+        line.set_xdata(range(epoch_num+1))
+        ax.relim()
+        ax.set_xlim(0, epoch_num)
+        ax.autoscale_view(True,True,True)
+        fig.canvas.draw()
+        plt.pause(0.1)
+
+        if epoch_num % 10 == 0:
+            play_game(1, epoch_num, screen, board_size, piece_size)
 
     agent.train(after_epoch_callback=after_epoch_callback)
