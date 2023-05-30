@@ -9,7 +9,6 @@ class Layer:
     weights: np.ndarray
     biases: np.ndarray
     neurons: np.ndarray
-    delta: np.ndarray
 
     def __init__(self, size: int, activation: Callable):
         self.size = size
