@@ -1,5 +1,64 @@
 \section{DeepQ}
 \label{sec:deepq}
-We have now added a title, author and date to our first \LaTeX{} document!
-\subsection{Podsekcja}
-ziut
+The purpose of this report is to outline the implementation of Deep Q-learning (DQL) used to play the game Snake. DQL is a reinforcement learning technique that combines Q-learning with deep neural networks that approximates the action-value function.
+
+\subsection{Implementation}
+The implementation includes a DeepQAgent which encapsulates the deep-q netrwork, the replay buffer(with past experiences), the epsilon policy and the training loop.
+The QNetwork class constructs the neural network that is used to approximate the action-value function.
+For each input layer and ouptut layer there is a hidden layer.
+DeepQAgentConfig is a class with configuration parameters for the used agent.
+DeepQSnake is a class that inherits from the Snake class and is used to play the game.
+
+\subsection{Initialization}
+The agent constructs the deep Q-network and initializes the replay buffer with the initial epsilon value, which is used to balance exploration and exploitation.
+
+\section{Training}
+The training consists of a loop that runs for a specified number of epochs. Each epoch includees a sequence of game steps and training steps. In each steps the agent makes a decision based on the epsilon, performs this decision and observes the next state, which leads to the potential reward. The agent then stores this experience in the replay buffer and samples a batch of experiences from the replay buffer. The agent then trains the network on the batch of experiences.
+The epsilon is decreased at the end of each epoch.
+
+\subsection{Bellman Equation}
+Bellman Equation is used to update the Q-values, which determine the expected return for state-action pairs. The Q-values are updated by the following formula: 
+\[
+Q(s, a) = r + \gamma \max_{a'} Q(s', a')
+\]
+
+where:
+\begin{itemize}
+    \item $Q(s, a)$ represents the expected return of taking action $a$ in state $s$ and following a fixed policy thereafter.
+    \item $r$ is the reward for taking action $a$ in state $s$.
+    \item $\gamma$ is the discount factor which determines the present value of future rewards.
+    \item $s'$ is the next state after taking action $a$ in state $s$.
+    \item $a'$ is the action taken in the next state $s'$.
+\end{itemize}
+
+However in this implementation the Q-values are updated by the following formula:
+
+\[
+q_{\text{target}} = r + \gamma \max_{a'} Q(s', a')
+\]
+
+The implementation takes advantage of the deep Q-network to approximate the Q-values. This allows the algorithm to work in large action spaces where calculating the maximum Q-value is computationally expensive.
+
+Besides that, during the training the goal of agent's actions is to minimalize the mean square error between the Q-values calculated using the Bellman Equation and the predicted Q-values.
+
+\subsubsection{Neural Network}
+Neural network used to train is described by this model:
+
+\begin{center}
+    $Model = $
+    \begin{tabular}{l}
+    $InputLayer(state\_size)$\\
+    $DenseLayer(hidden\_sizes[0], relu)$\\
+    $...$\\
+    $DenseLayer(hidden\_sizes[n], relu)$\\
+    $OutputLayer(action\_size, linear)$
+    \end{tabular}
+\end{center}
+
+Here, $state\_size$ is the size of the state representation, $hidden\_sizes$ is a list defining the number of neurons in each hidden layer, $action\_size$ is the number of possible actions, and $n$ is the index of the last hidden layer. 
+
+\begin{center}
+    $Layer(neurons, activationFunction)$\\
+\end{center}
+
+Each $InputLayer$ and $DenseLayer$ is fully connected to the next layer. The $relu$ (Rectified Linear Unit) activation function is used for all layers except for the output layer, which uses a linear activation function.
