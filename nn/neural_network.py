@@ -36,6 +36,25 @@ class NeuralNetwork:
         for i, layer in enumerate(self.layers[1:], 1):
             layer.calculate(self.layers[i - 1].neurons)
 
+    def backward(self, target: np.ndarray, input_data: np.ndarray):
+        output_layer = self.layers[-1]
+        output_delta = target - output_layer.neurons
+        output_layer.delta = output_delta * output_layer.activation(output_layer.neurons)
+
+        for i in range(len(self.layers) - 2, -1, -1):
+            current_layer = self.layers[i]
+            next_layer = self.layers[i + 1]
+
+            current_delta = (next_layer.delta @ next_layer.weights.T) * current_layer.activation(current_layer.neurons)
+            current_layer.delta = current_delta
+
+        for i in range(1, len(self.layers)):
+            current_layer = self.layers[i]
+            previous_layer = self.layers[i - 1]
+
+            current_layer.weights += np.dot(previous_layer.neurons.T, current_layer.delta)
+            current_layer.biases += np.sum(current_layer.delta, axis=0)
+
     def copy(self):
         layers = []
         layers.append(InputLayer(self.layers[0].size, linear))
@@ -49,7 +68,6 @@ class NeuralNetwork:
             np.copyto(neural_network_copy.layers[i].biases, self.layers[i].biases)
 
         return neural_network_copy
-
 
     def save(self, filename):
         with open(filename, 'wb') as f:

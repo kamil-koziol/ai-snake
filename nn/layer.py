@@ -3,8 +3,6 @@ from typing import List, Callable
 import numpy as np
 
 from nn.activation_functions import linear
-
-
 class Layer:
     size: int
     activation: Callable
